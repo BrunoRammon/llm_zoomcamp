@@ -1,0 +1,24 @@
+[project]
+name = "04-monitoring"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "ipykernel",
+    "notebook",
+    "pandas",
+    "numpy",
+    "elasticsearch",
+    "openai",
+    "scikit-learn",
+    "tqdm",
+    "sentence-transformers",
+    "ipywidgets",
+    "widgetsnbextension",
+    "jupyter_contrib_nbextensions",
+    "python-dotenv",
+    "streamlit",
+    "psycopg2-binary",
+    "pgcli",
+]
