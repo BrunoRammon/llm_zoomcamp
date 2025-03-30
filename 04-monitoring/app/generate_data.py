@@ -26,8 +26,59 @@ SAMPLE_ANSWERS = [
 ]
 
 COURSES = ["machine-learning-zoomcamp", "data-engineering-zoomcamp", "mlops-zoomcamp"]
-MODELS = ["ollama/phi3", "openai/gpt-3.5-turbo", "openai/gpt-4o", "openai/gpt-4o-mini"]
+MODELS = ["ollama/phi3", "openai/gpt-3.5-turbo", "openai/gpt-4o", "openai/gpt-4o-mini",
+          "deepseek/deeseek-chat", "deepseek/deeseek-reasoner"]
 RELEVANCE = ["RELEVANT", "PARTLY_RELEVANT", "NON_RELEVANT"]
+
+def generate_data(current_time):
+    conversation_id = str(uuid.uuid4())
+    question = random.choice(SAMPLE_QUESTIONS)
+    answer = random.choice(SAMPLE_ANSWERS)
+    course = random.choice(COURSES)
+    model = random.choice(MODELS)
+    eval_model = random.choice(MODELS)
+    relevance = random.choice(RELEVANCE)
+
+    answer_cost = 0
+    if model.startswith("openai/") or model.startswith("deepseek/"):
+        answer_cost = random.uniform(0.001, 0.1)
+
+    eval_cost = 0
+    if eval_model.startswith("openai/") or eval_model.startswith("deepseek/"):
+        eval_cost = random.uniform(0.001, 0.1)
+
+    answer_data = {
+        "answer": answer,
+        "response_time": random.uniform(0.5, 5.0),
+        "model_used": model,
+        "prompt_tokens": random.randint(50, 200),
+        "completion_tokens": random.randint(50, 300),
+        "total_tokens": random.randint(100, 500),
+        "cost": answer_cost,
+    }
+    eval_data = {
+        "relevance": relevance,
+        "relevance_explanation": f"This answer is {relevance.lower()} to the question.",
+        "response_time": random.uniform(0.5, 5.0),
+        "model_used": eval_model,
+        'prompt_tokens': random.randint(50, 150),
+        'completion_tokens': random.randint(20, 100),
+        'total_tokens': random.randint(70, 250),
+        'cost': eval_cost
+    }
+    save_conversation(conversation_id, question, answer_data, eval_data,
+                        course, current_time)
+
+    print(
+        f"Saved conversation: ID={conversation_id}, Time={current_time}, Course={course}, Model={model}"
+    )
+
+    if random.random() < 0.7:
+        feedback = 1 if random.random() < 0.8 else -1
+        save_feedback(conversation_id, feedback, current_time)
+        print(
+            f"Saved feedback for conversation {conversation_id}: {'Positive' if feedback > 0 else 'Negative'}"
+        )
 
 
 def generate_synthetic_data(start_time, end_time):
@@ -35,45 +86,7 @@ def generate_synthetic_data(start_time, end_time):
     conversation_count = 0
     print(f"Starting historical data generation from {start_time} to {end_time}")
     while current_time < end_time:
-        conversation_id = str(uuid.uuid4())
-        question = random.choice(SAMPLE_QUESTIONS)
-        answer = random.choice(SAMPLE_ANSWERS)
-        course = random.choice(COURSES)
-        model = random.choice(MODELS)
-        relevance = random.choice(RELEVANCE)
-
-        openai_cost = 0
-
-        if model.startswith("openai/"):
-            openai_cost = random.uniform(0.001, 0.1)
-
-        answer_data = {
-            "answer": answer,
-            "response_time": random.uniform(0.5, 5.0),
-            "relevance": relevance,
-            "relevance_explanation": f"This answer is {relevance.lower()} to the question.",
-            "model_used": model,
-            "prompt_tokens": random.randint(50, 200),
-            "completion_tokens": random.randint(50, 300),
-            "total_tokens": random.randint(100, 500),
-            "eval_prompt_tokens": random.randint(50, 150),
-            "eval_completion_tokens": random.randint(20, 100),
-            "eval_total_tokens": random.randint(70, 250),
-            "openai_cost": openai_cost,
-        }
-
-        save_conversation(conversation_id, question, answer_data, course, current_time)
-        print(
-            f"Saved conversation: ID={conversation_id}, Time={current_time}, Course={course}, Model={model}"
-        )
-
-        if random.random() < 0.7:
-            feedback = 1 if random.random() < 0.8 else -1
-            save_feedback(conversation_id, feedback, current_time)
-            print(
-                f"Saved feedback for conversation {conversation_id}: {'Positive' if feedback > 0 else 'Negative'}"
-            )
-
+        generate_data(current_time)    
         current_time += timedelta(minutes=random.randint(1, 15))
         conversation_count += 1
         if conversation_count % 10 == 0:
@@ -89,45 +102,7 @@ def generate_live_data():
     print("Starting live data generation...")
     while True:
         current_time = datetime.now(tz)
-        # current_time = None
-        conversation_id = str(uuid.uuid4())
-        question = random.choice(SAMPLE_QUESTIONS)
-        answer = random.choice(SAMPLE_ANSWERS)
-        course = random.choice(COURSES)
-        model = random.choice(MODELS)
-        relevance = random.choice(RELEVANCE)
-
-        openai_cost = 0
-
-        if model.startswith("openai/"):
-            openai_cost = random.uniform(0.001, 0.1)
-
-        answer_data = {
-            "answer": answer,
-            "response_time": random.uniform(0.5, 5.0),
-            "relevance": relevance,
-            "relevance_explanation": f"This answer is {relevance.lower()} to the question.",
-            "model_used": model,
-            "prompt_tokens": random.randint(50, 200),
-            "completion_tokens": random.randint(50, 300),
-            "total_tokens": random.randint(100, 500),
-            "eval_prompt_tokens": random.randint(50, 150),
-            "eval_completion_tokens": random.randint(20, 100),
-            "eval_total_tokens": random.randint(70, 250),
-            "openai_cost": openai_cost,
-        }
-
-        save_conversation(conversation_id, question, answer_data, course, current_time)
-        print(
-            f"Saved live conversation: ID={conversation_id}, Time={current_time}, Course={course}, Model={model}"
-        )
-
-        if random.random() < 0.7:
-            feedback = 1 if random.random() < 0.8 else -1
-            save_feedback(conversation_id, feedback, current_time)
-            print(
-                f"Saved feedback for live conversation {conversation_id}: {'Positive' if feedback > 0 else 'Negative'}"
-            )
+        generate_data(current_time)
 
         conversation_count += 1
         if conversation_count % 10 == 0:
